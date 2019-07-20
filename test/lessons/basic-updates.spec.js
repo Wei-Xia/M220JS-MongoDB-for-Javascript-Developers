@@ -1,6 +1,6 @@
-import { MongoClient } from "mongodb";
+import { MongoClient } from "mongodb"
 
-let theaters;
+let theaters
 describe("Basic Updates", async () => {
   /**
    * In this lesson, we'll discuss updating documents with the Node.js driver.
@@ -14,13 +14,13 @@ describe("Basic Updates", async () => {
     try {
       theaters = await global.mflixClient
         .db(process.env.MFLIX_NS)
-        .collection("theaters");
+        .collection("theaters")
     } catch (e) {
       console.error(
-        `Unable to establish a collection handle for "mflix.theaters": ${e}`
-      );
+        `Unable to establish a collection handle for "mflix.theaters": ${e}`,
+      )
     }
-  });
+  })
 
   it("Can update one document in a collection", async () => {
     /**
@@ -45,16 +45,16 @@ describe("Basic Updates", async () => {
 
     // when accessing a subdocument, we must use quotes
     // for example, "location.address.street1" would fail without quotes
-    const oldTheaterAddress = await theaters.findOne({ theaterId: 8 });
+    const oldTheaterAddress = await theaters.findOne({ theaterId: 8 })
 
     // expect the address of this theater to be "14141 Aldrich Ave S"
     expect(oldTheaterAddress.location.address.street1).toEqual(
-      "14141 Aldrich Ave S"
-    );
+      "14141 Aldrich Ave S",
+    )
     expect(oldTheaterAddress.location.geo.coordinates).toEqual([
       -93.288039,
-      44.747404
-    ]);
+      44.747404,
+    ])
 
     // update a single theater document in this collection
     const updateOneResult = await theaters.updateOne(
@@ -63,30 +63,30 @@ describe("Basic Updates", async () => {
         $set: { "location.address.street1": "14161 Aldrich Ave S" },
         $inc: {
           "location.geo.coordinates.0": -10,
-          "location.geo.coordinates.1": -25
-        }
-      }
-    );
+          "location.geo.coordinates.1": -25,
+        },
+      },
+    )
 
     // expect this operation to match exactly 1 theater document
-    expect(updateOneResult.matchedCount).toEqual(1);
+    expect(updateOneResult.matchedCount).toEqual(1)
 
     // expect this operation to update exactly 1 theater document
-    expect(updateOneResult.modifiedCount).toEqual(1);
+    expect(updateOneResult.modifiedCount).toEqual(1)
 
     const newTheaterAddress = await theaters.findOne(
       { theaterId: 8 },
-      { "location.address.street1": 1 }
-    );
+      { "location.address.street1": 1 },
+    )
 
     // expect the updated address of this theater to be "14161 Aldrich Ave S"
     expect(newTheaterAddress.location.address.street1).toEqual(
-      "14161 Aldrich Ave S"
-    );
+      "14161 Aldrich Ave S",
+    )
     expect(newTheaterAddress.location.geo.coordinates).toEqual([
       -103.288039,
-      19.747404000000003
-    ]);
+      19.747404000000003,
+    ])
 
     // do some cleanup
     const cleanUp = await theaters.updateOne(
@@ -95,13 +95,13 @@ describe("Basic Updates", async () => {
         $set: { "location.address.street1": "14141 Aldrich Ave S" },
         $inc: {
           "location.geo.coordinates.0": 10,
-          "location.geo.coordinates.1": 25
-        }
-      }
-    );
+          "location.geo.coordinates.1": 25,
+        },
+      },
+    )
 
-    expect(cleanUp.modifiedCount).toEqual(1);
-  });
+    expect(cleanUp.modifiedCount).toEqual(1)
+  })
 
   it("Can update many documents in a collection", async () => {
     /**
@@ -122,43 +122,43 @@ describe("Basic Updates", async () => {
      */
 
     const oldTheaterDocuments = await (await theaters.find({
-      "location.address.zipcode": "55111"
-    })).toArray();
+      "location.address.zipcode": "55111",
+    })).toArray()
 
     // expect all the theaters in 55111 to reside in Minneapolis
     oldTheaterDocuments.map(theater => {
-      expect(theater.location.address.city).toEqual("Minneapolis");
-    });
+      expect(theater.location.address.city).toEqual("Minneapolis")
+    })
 
     // same query predicate as the find() statement above
     const updateManyResult = await theaters.updateMany(
       { "location.address.zipcode": "55111" },
-      { $set: { "location.address.city": "Bloomington" } }
-    );
+      { $set: { "location.address.city": "Bloomington" } },
+    )
 
     // expect this operation to match exactly 6 theater document
-    expect(updateManyResult.matchedCount).toEqual(6);
+    expect(updateManyResult.matchedCount).toEqual(6)
 
     // expect this operation to update exactly 6 theater document
-    expect(updateManyResult.modifiedCount).toEqual(6);
+    expect(updateManyResult.modifiedCount).toEqual(6)
 
     const newTheaterDocuments = await (await theaters.find({
-      "location.address.zipcode": "55111"
-    })).toArray();
+      "location.address.zipcode": "55111",
+    })).toArray()
 
     // expect all the updated theater documents to reside in Bloomington
     newTheaterDocuments.map(theater => {
-      expect(theater.location.address.city).toEqual("Bloomington");
-    });
+      expect(theater.location.address.city).toEqual("Bloomington")
+    })
 
     // clean up
     const cleanUp = await theaters.updateMany(
       { "location.address.zipcode": "55111" },
-      { $set: { "location.address.city": "Minneapolis" } }
-    );
+      { $set: { "location.address.city": "Minneapolis" } },
+    )
 
-    expect(cleanUp.modifiedCount).toEqual(6);
-  });
+    expect(cleanUp.modifiedCount).toEqual(6)
+  })
 
   it("Can update a document if it exists, and insert if it does not", async () => {
     /**
@@ -187,40 +187,40 @@ describe("Basic Updates", async () => {
           street2: null,
           city: "New York",
           state: "NY",
-          zipcode: "10016"
+          zipcode: "10016",
         },
         geo: {
           type: "Point",
-          coordinates: [-75, 42]
-        }
-      }
-    };
+          coordinates: [-75, 42],
+        },
+      },
+    }
 
     const upsertResult = await theaters.updateOne(
       {
-        "location.address": newTheaterDoc.location.address
+        "location.address": newTheaterDoc.location.address,
       },
       {
-        $set: newTheaterDoc
+        $set: newTheaterDoc,
       },
-      { upsert: true }
-    );
+      { upsert: true },
+    )
 
     // expect this operation not to match any theater documents
-    expect(upsertResult.matchedCount).toEqual(0);
+    expect(upsertResult.matchedCount).toEqual(0)
 
     // expect this operation not to update any theater documents
-    expect(upsertResult.modifiedCount).toEqual(0);
+    expect(upsertResult.modifiedCount).toEqual(0)
 
     // this upsertedId contains the _id of the document that we just upserted
-    expect(upsertResult.upsertedId).not.toBeNull();
-    console.log(upsertResult.upsertedId);
+    expect(upsertResult.upsertedId).not.toBeNull()
+    console.log(upsertResult.upsertedId)
 
     // remove the document so it can be upserted again
     const cleanUp = await theaters.deleteOne({
-      "location.address": newTheaterDoc.location.address
-    });
+      "location.address": newTheaterDoc.location.address,
+    })
 
-    expect(cleanUp.deletedCount).toEqual(1);
-  });
-});
+    expect(cleanUp.deletedCount).toEqual(1)
+  })
+})

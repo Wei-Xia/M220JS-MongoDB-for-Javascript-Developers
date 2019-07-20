@@ -1,6 +1,6 @@
-import { MongoClient } from "mongodb";
+import { MongoClient } from "mongodb"
 
-let movies;
+let movies
 describe("Cursor Methods and Aggregation Equivalents", async () => {
   /**
    * In this lesson, we'll discuss the methods we can call against MongoDB
@@ -19,13 +19,13 @@ describe("Cursor Methods and Aggregation Equivalents", async () => {
     try {
       movies = await global.mflixClient
         .db(process.env.MFLIX_NS)
-        .collection("movies");
+        .collection("movies")
     } catch (e) {
       console.error(
-        `Unable to establish a collection handle for "mflix.movies": ${e}`
-      );
+        `Unable to establish a collection handle for "mflix.movies": ${e}`,
+      )
     }
-  });
+  })
 
   test("Can limit the number of results returned by a cursor", async () => {
     /**
@@ -38,11 +38,11 @@ describe("Cursor Methods and Aggregation Equivalents", async () => {
      */
     const limitedCursor = movies
       .find({ directors: "Sam Raimi" }, { _id: 0, title: 1, cast: 1 })
-      .limit(2);
+      .limit(2)
 
     // expect this cursor to contain exactly 2 results
-    expect((await limitedCursor.toArray()).length).toEqual(2);
-  });
+    expect((await limitedCursor.toArray()).length).toEqual(2)
+  })
 
   test("Can limit the number of results returned by a pipeline", async () => {
     /**
@@ -54,13 +54,13 @@ describe("Cursor Methods and Aggregation Equivalents", async () => {
     const limitPipeline = [
       { $match: { directors: "Sam Raimi" } },
       { $project: { _id: 0, title: 1, cast: 1 } },
-      { $limit: 2 }
-    ];
+      { $limit: 2 },
+    ]
 
-    const limitedAggregation = await movies.aggregate(limitPipeline);
+    const limitedAggregation = await movies.aggregate(limitPipeline)
 
-    expect((await limitedAggregation.toArray()).length).toEqual(2);
-  });
+    expect((await limitedAggregation.toArray()).length).toEqual(2)
+  })
 
   test("Can sort the results returned by a cursor", async () => {
     /**
@@ -78,18 +78,18 @@ describe("Cursor Methods and Aggregation Equivalents", async () => {
      */
     const sortedCursor = movies
       .find({ directors: "Sam Raimi" }, { _id: 0, year: 1, title: 1, cast: 1 })
-      .sort([["year", 1]]);
+      .sort([["year", 1]])
 
-    const movieArray = await sortedCursor.toArray();
+    const movieArray = await sortedCursor.toArray()
 
     // expect each movie in our cursor to be newer than the next movie in the
     // cursor
     for (var i = 0; i < movieArray.length - 1; i++) {
-      let movie = movieArray[i];
-      let nextMovie = movieArray[i + 1];
-      expect(movie.year).toBeLessThanOrEqual(nextMovie.year);
+      let movie = movieArray[i]
+      let nextMovie = movieArray[i + 1]
+      expect(movie.year).toBeLessThanOrEqual(nextMovie.year)
     }
-  });
+  })
 
   test("Can sort the results returned by a pipeline", async () => {
     /**
@@ -102,18 +102,18 @@ describe("Cursor Methods and Aggregation Equivalents", async () => {
     const sortPipeline = [
       { $match: { directors: "Sam Raimi" } },
       { $project: { _id: 0, year: 1, title: 1, cast: 1 } },
-      { $sort: { year: 1 } }
-    ];
+      { $sort: { year: 1 } },
+    ]
 
-    const sortAggregation = await movies.aggregate(sortPipeline);
-    const movieArray = await sortAggregation.toArray();
+    const sortAggregation = await movies.aggregate(sortPipeline)
+    const movieArray = await sortAggregation.toArray()
 
     for (var i = 0; i < movieArray.length - 1; i++) {
-      let movie = movieArray[i];
-      let nextMovie = movieArray[i + 1];
-      expect(movie.year).toBeLessThanOrEqual(nextMovie.year);
+      let movie = movieArray[i]
+      let nextMovie = movieArray[i + 1]
+      expect(movie.year).toBeLessThanOrEqual(nextMovie.year)
     }
-  });
+  })
 
   test("Can skip through results in a cursor", async () => {
     /**
@@ -133,18 +133,18 @@ describe("Cursor Methods and Aggregation Equivalents", async () => {
     const skippedCursor = movies
       .find({ directors: "Sam Raimi" }, { _id: 0, year: 1, title: 1, cast: 1 })
       .sort([["year", 1]])
-      .skip(5);
+      .skip(5)
 
     const regularCursor = movies
       .find({ directors: "Sam Raimi" }, { _id: 0, year: 1, title: 1, cast: 1 })
-      .sort([["year", 1]]);
+      .sort([["year", 1]])
 
     // expect the skipped cursor to contain the same results as the regular
     // cursor, minus the first five results
     expect(await skippedCursor.toArray()).toEqual(
-      (await regularCursor.toArray()).slice(5)
-    );
-  });
+      (await regularCursor.toArray()).slice(5),
+    )
+  })
 
   test("Can skip through results in a pipeline", async () => {
     /**
@@ -158,20 +158,20 @@ describe("Cursor Methods and Aggregation Equivalents", async () => {
       { $match: { directors: "Sam Raimi" } },
       { $project: { _id: 0, year: 1, title: 1, cast: 1 } },
       { $sort: { year: 1 } },
-      { $skip: 5 }
-    ];
+      { $skip: 5 },
+    ]
 
     const regularPipeline = [
       { $match: { directors: "Sam Raimi" } },
       { $project: { _id: 0, year: 1, title: 1, cast: 1 } },
-      { $sort: { year: 1 } }
-    ];
+      { $sort: { year: 1 } },
+    ]
 
-    const skippedAggregation = await movies.aggregate(skippedPipeline);
-    const regularAggregation = await movies.aggregate(regularPipeline);
+    const skippedAggregation = await movies.aggregate(skippedPipeline)
+    const regularAggregation = await movies.aggregate(regularPipeline)
 
     expect(await skippedAggregation.toArray()).toEqual(
-      (await regularAggregation.toArray()).slice(5)
-    );
-  });
-});
+      (await regularAggregation.toArray()).slice(5),
+    )
+  })
+})

@@ -4,12 +4,12 @@ describe("Callbacks, Promises, and Aysnc/Await", async () => {
    * and async/await in modern Javascript. We'll also discuss how the Node
    * driver responds depending on how you call certain methods.
    */
-  let movies;
+  let movies
   beforeAll(async () => {
     movies = await global.mflixClient
       .db(process.env.MFLIX_NS)
-      .collection("movies");
-  });
+      .collection("movies")
+  })
 
   test("Callbacks", done => {
     /**
@@ -23,17 +23,17 @@ describe("Callbacks, Promises, and Aysnc/Await", async () => {
      * For each example, we'll print out the collection names we have.
      */
     movies.findOne({ title: "Once Upon a Time in Mexico" }, function(err, doc) {
-      expect(err).toBeNull();
-      expect(doc.title).toBe("Once Upon a Time in Mexico");
-      expect(doc.cast).toContain("Salma Hayek");
-      done();
-    });
+      expect(err).toBeNull()
+      expect(doc.title).toBe("Once Upon a Time in Mexico")
+      expect(doc.cast).toContain("Salma Hayek")
+      done()
+    })
     /**
      * Here we passed a callback function. If there would have been an error,
      * the `err` paramater would have been some other value than Null. The doc
      * parameter was the found document.
      */
-  });
+  })
 
   test("Promises", done => {
     /**
@@ -54,14 +54,14 @@ describe("Callbacks, Promises, and Aysnc/Await", async () => {
     movies
       .findOne({ title: "Once Upon a Time in Mexico" })
       .then(doc => {
-        expect(doc.title).toBe("Once Upon a Time in Mexico");
-        expect(doc.cast).toContain("Salma Hayek");
-        done();
+        expect(doc.title).toBe("Once Upon a Time in Mexico")
+        expect(doc.cast).toContain("Salma Hayek")
+        done()
       })
       .catch(err => {
-        expect(err).toBeNull();
-        done();
-      });
+        expect(err).toBeNull()
+        done()
+      })
 
     /**
      * This is pretty nice. We said "Hey Mongo, find one document where the
@@ -70,7 +70,7 @@ describe("Callbacks, Promises, and Aysnc/Await", async () => {
      *
      * Now on to async/await!
      */
-  });
+  })
 
   test("Async/Await", async () => {
     /**
@@ -97,15 +97,15 @@ describe("Callbacks, Promises, and Aysnc/Await", async () => {
 
     try {
       let { title } = await movies.findOne({
-        title: "Once Upon a Time in Mexico"
-      });
+        title: "Once Upon a Time in Mexico",
+      })
       let { cast } = await movies.findOne({
-        title: "Once Upon a Time in Mexico"
-      });
-      expect(title).toBe("Once Upon a Time in Mexico");
-      expect(cast).toContain("Salma Hayek");
+        title: "Once Upon a Time in Mexico",
+      })
+      expect(title).toBe("Once Upon a Time in Mexico")
+      expect(cast).toContain("Salma Hayek")
     } catch (e) {
-      expect(e).toBeNull();
+      expect(e).toBeNull()
     }
 
     /**
@@ -115,7 +115,7 @@ describe("Callbacks, Promises, and Aysnc/Await", async () => {
      * wanted to demonstrate that multiple awaits can be within the same
      * try/catch block.
      */
-  });
+  })
 
   /**
    * And that covers Callbacks, Promises, and Async/Await at a high level and
@@ -132,4 +132,4 @@ describe("Callbacks, Promises, and Aysnc/Await", async () => {
    * If you don't pass a callback, a Promise will be returned.
    *
    */
-});
+})

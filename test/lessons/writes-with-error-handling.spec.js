@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { ObjectId } from "mongodb"
 describe("Error Handling", async () => {
   /* Hello!
    * In this lesson we are going to talk about Error Handling. We will cover a
@@ -14,26 +14,26 @@ describe("Error Handling", async () => {
    * helpful to know how to deal with them if and when they manifest themselves.
    */
 
-  let errors;
+  let errors
   // for this lesson we're creating a new collection called errors to work with.
   beforeAll(async () => {
     errors = await global.mflixClient
       .db(process.env.MFLIX_NS)
-      .collection("errors");
-  });
+      .collection("errors")
+  })
 
   // and after all the tests run, we'll drop this collection
   afterAll(async () => {
-    await errors.drop();
-  });
+    await errors.drop()
+  })
 
   it("duplicateKey", async () => {
     /**
      * add one document to the "errors" database with the _id value set to 0
      */
     let insertResult = await errors.insertOne({
-      _id: 0
-    });
+      _id: 0,
+    })
 
     /* The first common error can occur when you are trying to insert a document
      * in place of an already existing document. In our example there is already
@@ -46,23 +46,23 @@ describe("Error Handling", async () => {
      * Duplicate Key error.
      */
 
-    let { n, ok } = insertResult.result;
-    expect({ n, ok }).toEqual({ n: 1, ok: 1 });
+    let { n, ok } = insertResult.result
+    expect({ n, ok }).toEqual({ n: 1, ok: 1 })
     // Let's check that the document was successfully inserted.
-    expect(insertResult.insertedCount).toBe(1);
+    expect(insertResult.insertedCount).toBe(1)
 
     // and what if we tried to insert a document with the same _id?
     try {
       let dupId = await errors.insertOne({
-        _id: 0
-      });
+        _id: 0,
+      })
     } catch (e) {
-      expect(e).not.toBeUndefined();
+      expect(e).not.toBeUndefined()
       // we get an error message stating we've tried to insert a duplicate key
-      expect(e.errmsg).toContain("E11000 duplicate key error collection");
-      console.log(e);
+      expect(e.errmsg).toContain("E11000 duplicate key error collection")
+      console.log(e)
     }
-  });
+  })
 
   /* Great! It looks like the test passed, but it would be great to know
    * exactly what kind of error we are getting. In this test case you can see
@@ -75,12 +75,12 @@ describe("Error Handling", async () => {
   it("avoids duplicateKey", async () => {
     try {
       let notdupId = await errors.insertOne({
-        _id: 3
-      });
+        _id: 3,
+      })
     } catch (e) {
-      expect(e).toBeUndefined();
+      expect(e).toBeUndefined()
     }
-  });
+  })
 
   /* Another error to be on the lookout for is the timeout error. In this test
    * case we are trying to avoid breaking the application by using the try/catch
@@ -103,14 +103,14 @@ describe("Error Handling", async () => {
     try {
       let dupId = await errors.insertOne(
         {
-          _id: 6
+          _id: 6,
         },
-        { wtimeoutMS: 1 }
-      );
+        { wtimeoutMS: 1 },
+      )
     } catch (e) {
-      expect(e).toBeUndefined();
+      expect(e).toBeUndefined()
     }
-  });
+  })
 
   /*
    *
@@ -132,16 +132,16 @@ describe("Error Handling", async () => {
     try {
       let dupId = await errors.insertOne(
         {
-          _id: 6
+          _id: 6,
         },
-        { w: 5 }
-      );
+        { w: 5 },
+      )
     } catch (e) {
-      expect(e).not.toBeNull();
+      expect(e).not.toBeNull()
       // Now let's check the error that was returned from the driver.
-      console.log(e);
+      console.log(e)
     }
-  });
-});
+  })
+})
 
 // That's it for our lesson on error handling. Enjoy the rest of the course!

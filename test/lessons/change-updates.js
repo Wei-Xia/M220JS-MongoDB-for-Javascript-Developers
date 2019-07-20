@@ -1,13 +1,13 @@
-require("dotenv").config();
-const MongoClient = require("mongodb").MongoClient;
-const faker = require("faker");
-const MIN_LOAN_AMOUNT = 500;
-const MAX_LOAN_AMOUNT = 100000;
-(async function() {
+require("dotenv").config()
+const MongoClient = require("mongodb").MongoClient
+const faker = require("faker")
+const MIN_LOAN_AMOUNT = 500
+const MAX_LOAN_AMOUNT = 100000
+;(async function() {
   const client = await MongoClient.connect(
     process.env.MFLIX_DB_URI,
-    { wtimeout: 2500, poolSize: 50, useNewUrlParser: true }
-  );
+    { wtimeout: 2500, poolSize: 50, useNewUrlParser: true },
+  )
 
   /**
     In this portion of the lesson, we'll cover `update` change events, as well
@@ -15,8 +15,8 @@ const MAX_LOAN_AMOUNT = 100000;
   */
 
   try {
-    const bankDB = await client.db("bankDB");
-    const loans_collection = await bankDB.collection("loans");
+    const bankDB = await client.db("bankDB")
+    const loans_collection = await bankDB.collection("loans")
 
     /**
       Using a pipeline with a $match stage allows us to reduce the noise in our
@@ -28,12 +28,12 @@ const MAX_LOAN_AMOUNT = 100000;
     */
 
     // empty pipeline
-    const emptyPipeline = [];
+    const emptyPipeline = []
 
     // pipeline with a filter on the loan size
     const highAmountPipeline = [
-      { $match: { "fullDocument.amount": { $gt: 85000 } } }
-    ];
+      { $match: { "fullDocument.amount": { $gt: 85000 } } },
+    ]
 
     /**
       By default, "update" operations will NOT return a full document to the
@@ -48,8 +48,8 @@ const MAX_LOAN_AMOUNT = 100000;
     // we can use { fullDocument: "updateLookup" } to return full documents to
     // the change stream after update operations
     const changeStream = loans_collection.watch(highAmountPipeline, {
-      fullDocument: "updateLookup"
-    });
+      fullDocument: "updateLookup",
+    })
 
     /**
       After filtering on loan amount, we can further specify the operation, by
@@ -63,58 +63,58 @@ const MAX_LOAN_AMOUNT = 100000;
 
     changeStream.on("change", change => {
       // console.log(change)
-      let { amount, broker, borrower } = change.fullDocument;
+      let { amount, broker, borrower } = change.fullDocument
       switch (change.operationType) {
         case "insert":
           console.log(
-            `${broker} just negotiated a new loan with ${borrower} worth ${amount} USD!`
-          );
-          break;
+            `${broker} just negotiated a new loan with ${borrower} worth ${amount} USD!`,
+          )
+          break
         case "update":
           console.log(
-            `${broker} just refinanced a loan with ${borrower} worth ${amount} USD!`
-          );
-          break;
+            `${broker} just refinanced a loan with ${borrower} worth ${amount} USD!`,
+          )
+          break
       }
-    });
+    })
 
     // update the loans in this collection, to simulate loans being created and
     // restructured/refinanced
-    await simulateBankActivity(loans_collection);
+    await simulateBankActivity(loans_collection)
 
     // close the change stream and drop loans_collection when we're done
-    await changeStream.close();
-    await loans_collection.drop();
+    await changeStream.close()
+    await loans_collection.drop()
 
-    process.exit(1);
+    process.exit(1)
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
   async function simulateBankActivity(collection) {
     // produce a random integer - this will be each loan's amount
     function getRandomLoanAmount() {
-      min = Math.ceil(MIN_LOAN_AMOUNT);
-      max = Math.floor(MAX_LOAN_AMOUNT);
+      min = Math.ceil(MIN_LOAN_AMOUNT)
+      max = Math.floor(MAX_LOAN_AMOUNT)
       return (
         Math.floor(Math.random() * (MAX_LOAN_AMOUNT - MIN_LOAN_AMOUNT)) +
         MIN_LOAN_AMOUNT
-      );
+      )
     }
 
     // get a random date - this will be each loan's due date
     function getRandomDueDate() {
-      let startDate = new Date();
-      let endDate = new Date(2030, 0, 1);
+      let startDate = new Date()
+      let endDate = new Date(2030, 0, 1)
       return new Date(
         startDate.getTime() +
-          Math.random() * (endDate.getTime() - startDate.getTime())
-      );
+          Math.random() * (endDate.getTime() - startDate.getTime()),
+      )
     }
 
     // sleep for a given number of ms
     async function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      return new Promise(resolve => setTimeout(resolve, ms))
     }
 
     // randomly insert/update loan documents with new amounts and due dates
@@ -124,23 +124,23 @@ const MAX_LOAN_AMOUNT = 100000;
         borrower: faker.name.findName(),
         broker: faker.name.findName(),
         amount: getRandomLoanAmount(),
-        dueDate: getRandomDueDate()
-      };
+        dueDate: getRandomDueDate(),
+      }
       if (i < 50 || i % 2 == 0) {
-        let insertResult = await collection.insertOne(newLoanData);
+        let insertResult = await collection.insertOne(newLoanData)
       } else {
-        let { amount, broker, dueDate } = newLoanData;
+        let { amount, broker, dueDate } = newLoanData
 
         // randomly select a loan in loans_collection
         // to update its amount and due date
         let updateResult = await collection.updateOne(
           { _id: { $exists: true } },
           {
-            $set: { amount, dueDate }
-          }
-        );
+            $set: { amount, dueDate },
+          },
+        )
       }
-      await sleep(1000);
+      await sleep(1000)
     }
   }
-})();
+})()

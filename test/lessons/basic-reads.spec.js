@@ -7,14 +7,14 @@ describe("Basic Reads", async () => {
    * finds one document for us and returns it.
    */
 
-  let movies;
+  let movies
   // all this code does is set up a handle for us to use the movies collection
   // for our CRUD operations.
   beforeAll(async () => {
     movies = await global.mflixClient
       .db(process.env.MFLIX_NS)
-      .collection("movies");
-  });
+      .collection("movies")
+  })
 
   it("findOne", async () => {
     /**
@@ -25,36 +25,36 @@ describe("Basic Reads", async () => {
      */
 
     // Our filter
-    let filter = "Salma Hayek";
+    let filter = "Salma Hayek"
 
     // Because cast is an array, MongoDB will look at all elements of the array
     // to match this.This is because MongoDB treats arrays as first-class
     // objects.
-    let result = await movies.findOne({ cast: filter });
+    let result = await movies.findOne({ cast: filter })
 
     // we know we have a few movies where Salma Hayek is a cast member, so we
     // do not expect a null value
-    expect(result).not.toBeNull();
+    expect(result).not.toBeNull()
 
     // we've already explored this dataset, and know that the returned movie
     // be Roadracers. Let's check the title, year, and cast.
 
-    let { title, year, cast } = result;
-    console.log(result);
+    let { title, year, cast } = result
+    console.log(result)
 
     // we expect a title of Roadracers, the year would be 1994, and the cast
     // includes Salma Hayek and David Arquette
 
-    expect(title).toBe("Roadracers");
-    expect(year).toBe(1994);
-    expect(cast).toContain("David Arquette");
+    expect(title).toBe("Roadracers")
+    expect(year).toBe(1994)
+    expect(cast).toContain("David Arquette")
 
     // what if we did issue a query that resulted in no document returned? It
     // would be null
 
-    let nullResult = await movies.findOne({ cast: "flibberty pingpang" });
-    expect(nullResult).toBeNull();
-  });
+    let nullResult = await movies.findOne({ cast: "flibberty pingpang" })
+    expect(nullResult).toBeNull()
+  })
 
   // Looking at the document, we can see there is a lot of information.
   // What if we only wanted the title and year? You may be familiar with
@@ -68,20 +68,20 @@ describe("Basic Reads", async () => {
   it("project", async () => {
     // We will use the same query predicate as before,
     // but only specify the fields we wish to return in the projection part of the query.
-    let filter = "Salma Hayek";
+    let filter = "Salma Hayek"
 
     let result = await movies.findOne(
       { cast: filter },
-      { projection: { title: 1, year: 1 } }
-    );
+      { projection: { title: 1, year: 1 } },
+    )
 
-    expect(result).not.toBeNull();
+    expect(result).not.toBeNull()
 
     // and based on the projection we except the object to have 3 keys,
     // title, year, and _id
-    expect(Object.keys(result).length).toBe(3);
+    expect(Object.keys(result).length).toBe(3)
 
-    console.log(result);
+    console.log(result)
 
     // Note that only the fields we specify in the projection section of the
     // query will be returned in our result set with the exception of the _id
@@ -90,14 +90,14 @@ describe("Basic Reads", async () => {
 
     let result2 = await movies.findOne(
       { cast: filter },
-      { projection: { title: 1, year: 1, _id: 0 } }
-    );
+      { projection: { title: 1, year: 1, _id: 0 } },
+    )
 
-    expect(result2).not.toBeNull();
-    expect(Object.keys(result2).length).toBe(2);
+    expect(result2).not.toBeNull()
+    expect(Object.keys(result2).length).toBe(2)
 
-    console.log(result2);
-  });
+    console.log(result2)
+  })
 
   /**
    * Sometimes we don't want to find only one document, but all documents that
@@ -116,15 +116,15 @@ describe("Basic Reads", async () => {
     // With the Node driver, it will look as follows.
 
     let result = await movies.find({
-      cast: { $all: ["Salma Hayek", "Johnny Depp"] }
-    });
+      cast: { $all: ["Salma Hayek", "Johnny Depp"] },
+    })
     // very similar!
 
     // and we don't except a null result based on previous knowledge of this
     // dataset
-    expect(result).not.toBeNull();
+    expect(result).not.toBeNull()
 
-    let { title, year, cast } = await result.next();
+    let { title, year, cast } = await result.next()
 
     // you can see that we are using the result.next cursor method.
     // The db.collection.find() method in MongoDB returns a cursor.
@@ -138,14 +138,14 @@ describe("Basic Reads", async () => {
     // we expect the title of Once Upon a Time in Mexico, the year to be 2003,
     // and the cast to include Salma Hayek and Johnny Depp.
 
-    expect(title).toBe("Once Upon a Time in Mexico");
-    expect(year).toBe(2003);
-    expect(cast).toContain("Johnny Depp");
-    expect(cast).toContain("Salma Hayek");
+    expect(title).toBe("Once Upon a Time in Mexico")
+    expect(year).toBe(2003)
+    expect(cast).toContain("Johnny Depp")
+    expect(cast).toContain("Salma Hayek")
 
-    console.log({ title, year, cast });
-  });
-});
+    console.log({ title, year, cast })
+  })
+})
 
 /**
 
